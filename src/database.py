@@ -107,16 +107,16 @@ def init_db(db_path: Optional[str] = None):
         cursor.execute("""
         INSERT INTO users (email, password_hash, full_name, role)
         VALUES (?, ?, ?, ?);
-        """, ("admin@demo.local", hash_password("demo123"), "Hemanth Ranam", "Admin"))
+        """, ("booking.admin@demo.local", hash_password("demo123"), "Booking Coordinator", "Admin"))
 
-    # Seed Default Services if empty
+    # Seed Default Services if empty (100% Generic Appointment Types)
     cursor.execute("SELECT COUNT(*) FROM services;")
     if cursor.fetchone()[0] == 0:
         services = [
-            ("Executive Architecture Consultation", "Professional Services", 60, 15, 180.0, "GBP", "Comprehensive solution architecture review & roadmap session", "#3b82f6"),
-            ("Business Automation Discovery Audit", "Automation", 45, 15, 120.0, "GBP", "End-to-end operational workflow bottleneck inspection", "#06b6d4"),
-            ("Dental Hygiene & Preventive Treatment", "Healthcare", 30, 15, 65.0, "GBP", "Standard clinic hygiene scale and polish", "#10b981"),
-            ("Full Grooming & Precision Haircut", "Personal Care", 45, 15, 45.0, "GBP", "Bespoke styling and hot towel treatment", "#f59e0b")
+            ("Initial Consultation", "Consultation", 60, 15, 150.0, "GBP", "Comprehensive initial discovery & assessment session", "#2563eb"),
+            ("Standard Appointment", "Standard", 45, 15, 95.0, "GBP", "Standard professional consultation & review", "#0284c7"),
+            ("Follow-up Session", "Follow-up", 30, 15, 65.0, "GBP", "Routine progress review & status check", "#10b981"),
+            ("Assessment Session", "Assessment", 45, 15, 110.0, "GBP", "Technical requirements & workflow evaluation", "#f59e0b")
         ]
         cursor.executemany("""
         INSERT INTO services (name, category, duration_minutes, buffer_minutes, price, currency, description, color_token)
@@ -127,9 +127,9 @@ def init_db(db_path: Optional[str] = None):
     cursor.execute("SELECT COUNT(*) FROM staff;")
     if cursor.fetchone()[0] == 0:
         staff_members = [
-            ("Dr. Emily Vance", "emily.vance@demo.local", "+44 7700 900111", "Principal Consultant", "1,2,3,4,5", "09:00", "17:00", "13:00", "14:00", "#3b82f6"),
-            ("Marcus Chen", "marcus.chen@demo.local", "+44 7700 900222", "Senior Specialist", "1,2,3,4,5,6", "08:30", "17:30", "12:30", "13:30", "#06b6d4"),
-            ("Sarah Jenkins", "sarah.j@demo.local", "+44 7700 900333", "Operations Lead", "1,2,3,4,5", "10:00", "18:00", "14:00", "15:00", "#10b981")
+            ("Sarah Mitchell", "sarah.mitchell@demo.local", "+44 7700 900111", "Principal Consultant", "1,2,3,4,5", "09:00", "17:00", "13:00", "14:00", "#2563eb"),
+            ("James Wilson", "james.wilson@demo.local", "+44 7700 900222", "Senior Specialist", "1,2,3,4,5,6", "08:30", "17:30", "12:30", "13:30", "#0284c7"),
+            ("Daniel Carter", "daniel.carter@demo.local", "+44 7700 900333", "Operations Lead", "1,2,3,4,5", "10:00", "18:00", "14:00", "15:00", "#10b981")
         ]
         cursor.executemany("""
         INSERT INTO staff (name, email, phone, role, working_days, start_time, end_time, break_start, break_end, color_code)
@@ -140,9 +140,9 @@ def init_db(db_path: Optional[str] = None):
     cursor.execute("SELECT COUNT(*) FROM customers;")
     if cursor.fetchone()[0] == 0:
         customers = [
-            ("Oliver Queen", "oliver@starling.com", "+44 7700 900444", 3, 540.0, "Prefers morning slots"),
-            ("Elena Rostova", "elena.r@fintechcorp.io", "+44 7700 900555", 2, 240.0, "VIP Corporate Client"),
-            ("Julian North", "j.north@northstar-consulting.com", "+44 7700 900666", 5, 900.0, "Regular monthly strategy subscriber")
+            ("Olivia Bennett", "olivia.bennett@example.com", "+44 7700 900444", 3, 450.0, "Prefers morning appointments"),
+            ("Michael Harris", "michael.harris@example.com", "+44 7700 900555", 2, 190.0, "Regular consultation client"),
+            ("Emily Cooper", "emily.cooper@example.com", "+44 7700 900666", 5, 550.0, "Monthly review subscriber")
         ]
         cursor.executemany("""
         INSERT INTO customers (name, email, phone, total_visits, total_spent, notes)
@@ -151,9 +151,9 @@ def init_db(db_path: Optional[str] = None):
 
         # Seed Appointments
         appointments = [
-            (1, 1, 1, "2026-08-29", "10:00", "11:00", "11:15", "Confirmed", 50.0, 180.0, "Architecture deep-dive", "Pre-read documents sent"),
-            (2, 2, 2, "2026-08-29", "14:00", "14:45", "15:00", "Confirmed", 0.0, 120.0, "Automating invoice alerts", None),
-            (3, 3, 3, "2026-08-28", "11:00", "11:30", "11:45", "Completed", 65.0, 65.0, "Regular hygiene", "Completed successfully")
+            (1, 1, 1, "2026-08-29", "10:00", "11:00", "11:15", "Confirmed", 50.0, 150.0, "Initial consultation notes", "Pre-consultation briefing prepared"),
+            (2, 2, 2, "2026-08-29", "14:00", "14:45", "15:00", "Confirmed", 0.0, 95.0, "Standard review appointment", None),
+            (3, 3, 3, "2026-08-28", "11:00", "11:30", "11:45", "Completed", 65.0, 65.0, "Routine follow-up", "Session completed")
         ]
         cursor.executemany("""
         INSERT INTO appointments (service_id, staff_id, customer_id, booking_date, start_time, end_time, buffer_end_time, status, deposit_paid, price, customer_notes, internal_notes)
