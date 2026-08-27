@@ -1,0 +1,25 @@
+{
+  "brand_name": "Hemanth Ranam Professional Services",
+  "product_name": "HR Bookings",
+  "tagline": "Universal 24/7 Appointment & Availability Engine",
+  "theme": {
+    "primary_color": "#2563eb",
+    "deep_blue": "#1d4ed8",
+    "light_blue": "#60a5fa",
+    "bg_canvas": "#ffffff",
+    "bg_secondary": "#f8fafc",
+    "text_primary": "#0f172a",
+    "text_muted": "#64748b",
+    "card_border": "#e2e8f0",
+    "font_family": "Inter, Outfit, system-ui, sans-serif",
+    "border_radius": "12px"
+  },
+  "business_profile": {
+    "company_name": "Hemanth Ranam Solutions",
+    "address": "United Kingdom",
+    "default_currency": "USD",
+    "currency_symbol": "$",
+    "timezone": "Europe/London",
+    "slot_interval_minutes": 30
+  }
+}
