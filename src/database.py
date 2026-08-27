@@ -2,7 +2,7 @@ import sqlite3
 import os
 from contextlib import contextmanager
 
-DB_PATH = os.getenv("BOOKING_DB_PATH", "booking.db")
+DB_PATH = os.getenv("BOOKING_DB_PATH", os.getenv("BOOKINGS_DB_PATH", "booking.db"))
 
 def init_db(db_path: str = DB_PATH):
     """Initializes SQLite database with WAL mode and booking tables."""

@@ -62,12 +62,14 @@ class StaffCreate(BaseModel):
 class PublicBookingRequest(BaseModel):
     service_id: int
     staff_id: int
-    booking_date: str # YYYY-MM-DD
+    booking_date: Optional[str] = None # YYYY-MM-DD
+    appointment_date: Optional[str] = None # YYYY-MM-DD
     start_time: str   # HH:MM
     customer_name: str
     customer_email: str
     customer_phone: Optional[str] = ""
     customer_notes: Optional[str] = ""
+    notes: Optional[str] = ""
 
 class AppointmentStatusUpdate(BaseModel):
     status: str # Confirmed, Completed, Cancelled, Rescheduled
@@ -213,6 +215,7 @@ def get_available_slots(service_id: int, staff_id: int, date: str):
 
 # Appointments & Public Booking
 @app.get("/api/appointments")
+@app.get("/api/bookings")
 def list_appointments(status: Optional[str] = None):
     with get_db() as conn:
         query = """
@@ -232,9 +235,16 @@ def list_appointments(status: Optional[str] = None):
         return [dict(r) for r in rows]
 
 @app.post("/api/v1/public/book", status_code=201)
+@app.post("/api/bookings", status_code=201)
+@app.post("/api/appointments", status_code=201)
 def public_book_appointment(req: PublicBookingRequest):
     """Public customer booking endpoint with collision validation."""
-    if not is_slot_available(req.service_id, req.staff_id, req.booking_date, req.start_time):
+    target_date = req.booking_date or req.appointment_date
+    if not target_date:
+        raise HTTPException(status_code=400, detail="booking_date or appointment_date is required")
+    target_notes = req.customer_notes or req.notes or ""
+
+    if not is_slot_available(req.service_id, req.staff_id, target_date, req.start_time):
         raise HTTPException(status_code=409, detail="Selected slot is no longer available. Please choose another time.")
 
     with get_db() as conn:
@@ -245,40 +255,53 @@ def public_book_appointment(req: PublicBookingRequest):
         if not service:
             raise HTTPException(status_code=404, detail="Service not found")
         
-        start_dt = datetime.strptime(f"{req.booking_date} {req.start_time}", "%Y-%m-%d %H:%M")
+        start_dt = datetime.strptime(f"{target_date} {req.start_time}", "%Y-%m-%d %H:%M")
         end_dt = start_dt + timedelta(minutes=service[0])
         end_time_str = end_dt.strftime("%H:%M")
 
         # Create or find customer
         cursor.execute("INSERT INTO customers (name, email, phone, notes) VALUES (?, ?, ?, ?)",
-                       (req.customer_name, req.customer_email, req.customer_phone, req.customer_notes))
+                       (req.customer_name, req.customer_email, req.customer_phone, target_notes))
         customer_id = cursor.lastrowid
 
         # Create appointment
         cursor.execute("""
         INSERT INTO appointments (service_id, staff_id, customer_id, booking_date, start_time, end_time, status, customer_notes)
         VALUES (?, ?, ?, ?, ?, ?, 'Confirmed', ?)
-        """, (req.service_id, req.staff_id, customer_id, req.booking_date, req.start_time, end_time_str, req.customer_notes))
+        """, (req.service_id, req.staff_id, customer_id, target_date, req.start_time, end_time_str, target_notes))
         appt_id = cursor.lastrowid
         conn.commit()
 
         return {
             "status": "success",
+            "booking_status": "Confirmed",
+            "id": appt_id,
             "booking_id": appt_id,
+            "start_time": req.start_time,
+            "end_time": end_time_str,
             "message": "Appointment confirmed successfully",
             "details": {
-                "date": req.booking_date,
+                "date": target_date,
                 "time": f"{req.start_time} - {end_time_str}",
                 "customer": req.customer_name
             }
         }
 
 @app.put("/api/appointments/{appt_id}/status")
+@app.put("/api/bookings/{appt_id}/status")
 def update_status(appt_id: int, req: AppointmentStatusUpdate):
     with get_db() as conn:
         conn.execute("UPDATE appointments SET status = ? WHERE id = ?", (req.status, appt_id))
         conn.commit()
         return {"status": "updated", "id": appt_id, "new_status": req.status}
+
+@app.put("/api/bookings/{appt_id}/cancel")
+@app.put("/api/appointments/{appt_id}/cancel")
+def cancel_appointment(appt_id: int):
+    with get_db() as conn:
+        conn.execute("UPDATE appointments SET status = 'Cancelled' WHERE id = ?", (appt_id,))
+        conn.commit()
+        return {"status": "cancelled", "id": appt_id}
 
 # Export Endpoints (Data Sovereignty)
 @app.get("/api/export/csv")
@@ -315,6 +338,7 @@ def export_json():
     return JSONResponse(content={
         "metadata": {"exporter": "Hemanth Ranam Professional Services - HR Bookings", "version": "1.0.0"},
         "appointments": appts,
+        "bookings": appts,
         "services": services,
         "staff": staff,
         "customers": customers
