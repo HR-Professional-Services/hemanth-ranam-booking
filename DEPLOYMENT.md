@@ -1,30 +1,36 @@
-# DEPLOYMENT GUIDE — HR BOOKINGS
+# HR Bookings — V1 Deployment & Operational Guide
 
-**System**: HR Bookings (Product 06)  
-**Provider**: Hemanth Ranam Professional Services  
-**Source Hub**: [https://app.hemanth-ranam.workers.dev/](https://app.hemanth-ranam.workers.dev/)
-
----
-
-## 1. Hosting Tier Classifications
-
-| Tier | Environment | Runtime / Stack | Database | Monthly Cost | Best For |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Tier A (Recommended)** | Cloudflare Pages + Serverless | Python / Node / Edge | SQLite WAL / Cloudflare D1 | **$0.00 / month** | Clinics, Salons, Tutors (< 10,000 appts/mo) |
-| **Tier B** | Fly.io / Render / Docker | Python FastAPI Container | Persistent SQLite / Postgres | **$0.00 - $5.00 / month** | Multi-location businesses |
-| **Tier C** | Client-Owned Dedicated Server | Docker Compose + Nginx | PostgreSQL 16 | **$10.00 / month** | Hospital networks, high volume practices |
+## System Requirements
+- **Runtime**: Python 3.10, 3.11, or 3.12
+- **Port**: `8002`
+- **Memory**: ~40MB RAM
 
 ---
 
-## 2. Fast Deployment via Docker Compose
+## Environment Variables
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `PORT` | `8002` | Uvicorn listener port |
+| `BOOKING_DB_PATH` | `booking.db` | SQLite database path |
+
+---
+
+## Startup Commands
 ```bash
-git clone https://github.com/HR-Professional-Services/hemanth-ranam-booking.git
-cd hemanth-ranam-booking
-docker compose up -d --build
+# Development
+python3 -m uvicorn src.app:app --host 0.0.0.0 --port 8002 --reload
+
+# Production
+python3 -m uvicorn src.app:app --host 0.0.0.0 --port 8002 --workers 2
 ```
 
----
+## Health Check
+```bash
+curl http://127.0.0.1:8002/api/health
+# Expected: {"status":"healthy","service":"HR Bookings"}
+```
 
-## 3. Cloudflare DNS & SSL Setup
-1. Map `book.clientdomain.com` as an `A` record pointing to the container IP.
-2. Ensure Proxy Status is `Proxied` (Orange Cloud) for automatic free SSL and global Edge caching.
+## Backup
+```bash
+sqlite3 booking.db ".backup 'booking_snapshot_$(date +%Y%m%d).db'"
+```
