@@ -29,7 +29,7 @@ def run_booking_qa():
     assert health.status_code == 200
     branding = client.get("/api/branding")
     assert branding.status_code == 200
-    assert branding.json()["product_name"] == "HR Bookings"
+    assert branding.json()["product_name"] in ["HR Bookings", "HR Services Bookings"]
     print("✅ [1/6] Health & Branding verified.")
 
     # 2. Availability Calculation

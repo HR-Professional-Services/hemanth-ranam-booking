@@ -31,8 +31,8 @@ def seed():
 
         # Staff
         staff = [
-            ("Hemanth Ranam", "hemanth.ranam@gmail.com", "+917675815245", "Principal Systems Architect", "1,2,3,4,5", "09:00", "18:00"),
-            ("Sarah Jenkins", "sarah.j@hemanth-ranam.com", "+44 20 7946 0192", "Senior Automation Specialist", "1,2,3,4,5", "10:00", "17:00")
+            ("Alexander Ross", "alexander.r@hr-services.local", "+44 20 7946 0991", "Principal Systems Architect", "1,2,3,4,5", "09:00", "18:00"),
+            ("Sarah Jenkins", "sarah.j@hr-services.local", "+44 20 7946 0192", "Senior Automation Specialist", "1,2,3,4,5", "10:00", "17:00")
         ]
         st_ids = []
         for st in staff:

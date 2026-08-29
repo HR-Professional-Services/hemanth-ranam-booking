@@ -1,8 +1,8 @@
 {
-  "brand_name": "HR Professional Services",
-  "product_name": "HR Bookings",
+  "brand_name": "HR Services",
+  "product_name": "HR Services Bookings",
   "tagline": "Universal 24/7 Appointment & Availability Engine",
-  "logo_text": "HR Bookings",
+  "logo_text": "HR Services Bookings",
   "theme": {
     "primary_color": "#2563eb",
     "deep_blue": "#1d4ed8",
@@ -22,8 +22,8 @@
     "date_format": "YYYY-MM-DD"
   },
   "contact": {
-    "organization": "HR Professional Services",
-    "email": "info@hr-services.local",
+    "organization": "HR Services",
+    "email": "bookings@hr-services.local",
     "support": "support@hr-services.local"
   }
 }
